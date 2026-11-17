@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spot the NOVA Group — Food Processing &amp; Ingredient Detective Game</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="antialiased selection:bg-emerald-500 selection:text-slate-950">
+
+  <!-- Top Navigation & Status Header -->
+  <header class="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 via-amber-400 to-rose-500 p-0.5 shadow-lg shadow-emerald-500/10">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-black text-xs tracking-tighter">
+            <span class="text-emerald-400">1</span><span class="text-amber-400">2</span><span class="text-orange-400">3</span><span class="text-rose-500">4</span>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-base sm:text-lg tracking-tight text-white">SPOT THE NOVA GROUP</h1>
+            <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              Photo &amp; Ingredient Detective
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Classify foods from NOVA 1 (Unprocessed) to NOVA 4 (Ultra-Processed) by product photo or ingredient list</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <nav class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800" aria-label="Main Views">
+          <button id="tabPlayBtn" type="button" class="px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-500 text-slate-950 shadow">
+            Scanner Game
+          </button>
+          <button id="tabGuideBtn" type="button" class="px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white">
+            NOVA Guide
+          </button>
+          <button id="tabDexBtn" type="button" class="px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white">
+            Pantry Dex (24)
+          </button>
+          <button id="tabGithubBtn" type="button" class="px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white">
+            GitHub Files
+          </button>
+        </nav>
+
+        <button id="soundToggleBtn" type="button" title="Toggle Sound Effects (M)" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition">
+          <svg id="soundOnIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H2v6h4l5 4V5z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14" />
+          </svg>
+          <svg id="soundOffIcon" class="w-4 h-4 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 py-4">
+
+    <!-- ==================== VIEW 1: SCANNER GAME ==================== -->
+    <section id="viewPlay" class="space-y-4">
+
+      <!-- Mode & Clue Control Bar + Live HUD -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
+        <div class="lg:col-span-7 bg-slate-900/80 border border-slate-800/90 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-col gap-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Game Mode</span>
+            <div class="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+              <button id="modeDeckBtn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-500 text-white transition">
+                10-Card Shift
+              </button>
+              <button id="modeRushBtn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+                60s Belt Rush
+              </button>
+              <button id="modePracticeBtn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+                Endless Lab
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Challenge Clue Filter</span>
+            <div class="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+              <button id="clueBothBtn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 transition">
+                Image + Ingredients
+              </button>
+              <button id="clueImageBtn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+                Image Only
+              </button>
+              <button id="clueIngredientsBtn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+                Ingredients Only
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-slate-900/80 border border-slate-800/90 rounded-2xl p-3 grid grid-cols-4 gap-2 text-center items-center">
+          <div class="bg-slate-950/80 rounded-xl py-1.5 px-2 border border-slate-800/70">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Score</div>
+            <div id="hudScore" class="text-base sm:text-lg font-black text-emerald-400 mono">0</div>
+          </div>
+          <div class="bg-slate-950/80 rounded-xl py-1.5 px-2 border border-slate-800/70">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Streak</div>
+            <div id="hudStreak" class="text-base sm:text-lg font-black text-amber-400 mono">0x</div>
+          </div>
+          <div class="bg-slate-950/80 rounded-xl py-1.5 px-2 border border-slate-800/70">
+            <div id="hudProgressLabel" class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Specimen</div>
+            <div id="hudProgress" class="text-base sm:text-lg font-black text-white mono">1/10</div>
+          </div>
+          <div class="bg-slate-950/80 rounded-xl py-1.5 px-2 border border-slate-800/70">
+            <div id="hudStatusLabel" class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Lives</div>
+            <div id="hudStatusValue" class="text-sm sm:text-base font-black text-rose-400 mono">❤❤❤</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Split Inspection Workbench -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+        <!-- LEFT COLUMN: Real Studio Product Photo + Interactive Optical Scanner (7 cols) -->
+        <div class="lg:col-span-7 flex flex-col bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <!-- Scanner Top Bar -->
+          <div class="px-4 py-2.5 bg-slate-950/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Product Photograph &amp; Optical Scanner</span>
+              <span id="specimenCategoryBadge" class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                Dairy &amp; Eggs
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="toggleLoupeBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 transition flex items-center gap-1">
+                <span>🔍 X-Ray Loupe:</span>
+                <span id="loupeStateText" class="font-bold text-emerald-400">ON</span>
+              </button>
+              <button id="restartRoundBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                ↻ New Deck
+              </button>
+            </div>
+          </div>
+
+          <!-- Dual Visual Inspection Stage: Real Studio Photograph + Interactive Scanner Canvas -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 bg-slate-950 border-b border-slate-800">
+            <!-- Prominent Studio Photograph Frame (5 cols on sm+) -->
+            <div id="specimenMainPhotoWrap" class="sm:col-span-5 p-3 flex flex-col justify-between border-b sm:border-b-0 sm:border-r border-slate-800/90 bg-slate-950/90">
+              <div class="specimen-photo-frame h-48 sm:h-56 w-full">
+                <img id="specimenMainPhotoImg" src="images/nova1_whole_foods.jpg" alt="Current Food Specimen" class="specimen-photo-img" />
+                <div id="specimenPhotoRedactedOverlay" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center">
+                  <span class="px-2.5 py-1 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-wider">
+                    Ingredients-Only Mode
+                  </span>
+                  <p class="text-xs font-bold text-white mt-2">Product Photo Sealed</p>
+                  <p class="text-[11px] text-slate-300 mt-0.5">Submit your NOVA 1–4 guess to reveal the studio photo!</p>
+                </div>
+                <div class="absolute top-2 left-2 px-2 py-0.5 rounded bg-slate-950/85 border border-slate-700 text-[10px] font-bold text-emerald-300">
+                  📷 Studio Specimen Photo
+                </div>
+              </div>
+              <p id="specimenPhotoCaption" class="text-[11px] text-slate-300 font-medium mt-2 leading-snug">
+                Inspect the real product photo &amp; hover the scanner on the right to zoom.
+              </p>
+            </div>
+
+            <!-- Interactive HTML5 Canvas Scanner & Loupe (7 cols on sm+) -->
+            <div id="canvasContainer" class="sm:col-span-7 relative w-full h-56 sm:h-64 bg-slate-950 select-none overflow-hidden">
+              <canvas id="scannerCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+
+              <div id="photoRefBadge" class="hidden absolute bottom-2.5 left-2.5 bg-slate-950/95 border border-slate-700/90 rounded-xl p-1.5 shadow-lg flex items-center gap-2 max-w-[230px] pointer-events-none">
+                <img id="photoRefImg" src="images/nova1_whole_foods.jpg" alt="NOVA Group Reference" class="w-10 h-9 object-cover rounded-lg border border-slate-700 shrink-0" />
+                <div class="text-[10px] leading-tight">
+                  <div id="photoRefTitle" class="font-bold text-white">NOVA Group Reference</div>
+                  <div id="photoRefSub" class="text-slate-400">Unlocked after verdict</div>
+                </div>
+              </div>
+
+              <div class="absolute top-2.5 right-2.5 bg-slate-950/85 border border-slate-800/90 px-2.5 py-0.5 rounded-full text-[10px] text-slate-300 pointer-events-none">
+                Hover / touch for X-Ray Zoom
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Quick Metadata Bar -->
+          <div class="px-4 py-3 bg-slate-950/75 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Specimen Name</div>
+              <h2 id="productTitleDisplay" class="text-base sm:text-lg font-extrabold text-white">Plain Greek Yogurt</h2>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="text-right">
+                <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Store Aisle</div>
+                <div id="productAisleDisplay" class="text-xs font-bold text-slate-200">Chilled Dairy Case</div>
+              </div>
+              <div class="h-7 w-px bg-slate-800"></div>
+              <div class="text-right">
+                <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Processing Method</div>
+                <div id="productProcessDisplay" class="text-xs font-bold text-amber-300">Inspect to reveal</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Back-of-Pack Ingredients Label & Detective Tools (5 cols) -->
+        <div class="lg:col-span-5 flex flex-col justify-between gap-3">
+          <div class="nutrition-card rounded-2xl p-4 flex-1 flex flex-col justify-between relative overflow-hidden">
+            <div>
+              <div class="border-b-4 border-slate-900 pb-2 mb-3 flex items-start justify-between gap-2">
+                <div>
+                  <div class="text-[10px] font-black uppercase tracking-widest text-slate-600">Official Back-of-Pack Declaration</div>
+                  <h3 class="text-xl font-black tracking-tight text-slate-900 leading-none mt-0.5">INGREDIENTS &amp; FORMULATION</h3>
+                </div>
+                <span id="ingredientCountPill" class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold text-xs mono">
+                  2 Ingredients
+                </span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-1.5 border-b-2 border-slate-900 pb-2.5 mb-3 text-center bg-slate-100 rounded-lg p-1.5">
+                <div>
+                  <div class="text-[10px] font-bold uppercase text-slate-500">Serving</div>
+                  <div id="nutriServing" class="text-xs font-extrabold text-slate-900 mono">170g Cup</div>
+                </div>
+                <div class="border-x border-slate-300">
+                  <div class="text-[10px] font-bold uppercase text-slate-500">Shelf Life</div>
+                  <div id="nutriShelf" class="text-xs font-extrabold text-slate-900 mono">14 Days Chilled</div>
+                </div>
+                <div>
+                  <div class="text-[10px] font-bold uppercase text-slate-500">Kitchen Test</div>
+                  <div id="nutriKitchen" class="text-xs font-extrabold text-slate-900">Scan or guess</div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-xs font-black uppercase tracking-wider text-slate-800">Declared Ingredients List:</span>
+                  <button id="scanCluesBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 transition flex items-center gap-1">
+                    <span>🔬 Highlight NOVA Clues (H)</span>
+                  </button>
+                </div>
+
+                <div id="ingredientsRedactedBox" class="hidden rounded-xl border-2 border-dashed border-slate-400 bg-slate-200/90 p-5 text-center my-2">
+                  <div class="text-sm font-black uppercase tracking-wider text-slate-800">🔒 Ingredients List Sealed</div>
+                  <p class="text-xs text-slate-600 mt-1">
+                    You are in <strong>Product Image Only</strong> mode! Inspect the studio photo and scanner on the left, or click "Highlight NOVA Clues" to peek.
+                  </p>
+                </div>
+
+                <div id="ingredientsListContainer" class="flex flex-wrap gap-1.5 py-1"></div>
+                <p id="ingredientsRawText" class="mt-2.5 text-xs text-slate-700 leading-relaxed bg-amber-50/70 border border-amber-200/80 rounded-lg p-2.5 mono"></p>
+              </div>
+            </div>
+
+            <div class="border-t-2 border-slate-900 pt-2.5 mt-2">
+              <div id="clueLegendBox" class="grid grid-cols-3 gap-1.5 text-[10px] font-bold">
+                <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 text-emerald-950 px-2 py-1 rounded">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+                  <span>Whole Food (G1)</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-300 text-amber-950 px-2 py-1 rounded">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span>
+                  <span>Culinary (G2)</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-rose-50 border border-rose-300 text-rose-950 px-2 py-1 rounded">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0"></span>
+                  <span>UPF Marker (G4)</span>
+                </div>
+              </div>
+              <p id="spectrometerNote" class="text-[11px] text-slate-600 mt-1.5 font-medium">
+                Tip: Click any ingredient chip or press <kbd class="px-1.5 py-0.5 bg-slate-200 rounded text-slate-800 font-bold">H</kbd> to scan for culinary vs. industrial markers.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM ACTION DECK: 4 NOVA Classification Buttons + Post-Guess Forensic Feedback -->
+      <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-200">
+              Classify This Specimen: Which NOVA Group Does It Belong To?
+            </h3>
+            <p class="text-xs text-slate-400">Click a NOVA group card below or press keys <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 mono text-[11px]">1</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 mono text-[11px]">2</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 mono text-[11px]">3</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 mono text-[11px]">4</kbd></p>
+          </div>
+          <div id="accuracyTrackerText" class="text-xs font-bold text-slate-400 mono">
+            Session Accuracy: 100% (0/0)
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <button id="guessNova1Btn" type="button" data-nova="1" class="nova-btn group text-left rounded-xl p-3.5 bg-slate-950 hover:bg-emerald-950/40 border-2 border-emerald-500/40 hover:border-emerald-400 flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full mb-1.5">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs mono">NOVA 1</span>
+              <span class="text-[11px] font-bold text-slate-400 group-hover:text-emerald-300 mono">Key [1]</span>
+            </div>
+            <div class="font-extrabold text-sm text-white group-hover:text-emerald-200">Unprocessed or Minimally Processed</div>
+            <p class="text-[11px] text-slate-400 mt-1 leading-snug">
+              Whole plant/animal foods altered only by washing, freezing, drying, grinding, or pasteurizing. Nothing added.
+            </p>
+          </button>
+
+          <button id="guessNova2Btn" type="button" data-nova="2" class="nova-btn group text-left rounded-xl p-3.5 bg-slate-950 hover:bg-amber-950/40 border-2 border-amber-500/40 hover:border-amber-400 flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full mb-1.5">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-400 text-slate-950 font-black text-xs mono">NOVA 2</span>
+              <span class="text-[11px] font-bold text-slate-400 group-hover:text-amber-300 mono">Key [2]</span>
+            </div>
+            <div class="font-extrabold text-sm text-white group-hover:text-amber-200">Processed Culinary Ingredients</div>
+            <p class="text-[11px] text-slate-400 mt-1 leading-snug">
+              Pressed, refined, or extracted substances used to season &amp; cook (oils, butter, salt, sugar, honey, vinegar).
+            </p>
+          </button>
+
+          <button id="guessNova3Btn" type="button" data-nova="3" class="nova-btn group text-left rounded-xl p-3.5 bg-slate-950 hover:bg-orange-950/40 border-2 border-orange-500/40 hover:border-orange-400 flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full mb-1.5">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-orange-500 text-slate-950 font-black text-xs mono">NOVA 3</span>
+              <span class="text-[11px] font-bold text-slate-400 group-hover:text-orange-300 mono">Key [3]</span>
+            </div>
+            <div class="font-extrabold text-sm text-white group-hover:text-orange-200">Processed Foods</div>
+            <p class="text-[11px] text-slate-400 mt-1 leading-snug">
+              NOVA 1 food + NOVA 2 salt/sugar/oil (canned veg/fish, traditional cheese, salted nuts, simple 4-ingredient bread).
+            </p>
+          </button>
+
+          <button id="guessNova4Btn" type="button" data-nova="4" class="nova-btn group text-left rounded-xl p-3.5 bg-slate-950 hover:bg-rose-950/40 border-2 border-rose-500/40 hover:border-rose-400 flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full mb-1.5">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-rose-500 text-white font-black text-xs mono">NOVA 4</span>
+              <span class="text-[11px] font-bold text-slate-400 group-hover:text-rose-300 mono">Key [4]</span>
+            </div>
+            <div class="font-extrabold text-sm text-white group-hover:text-rose-200">Ultra-Processed Foods (UPF)</div>
+            <p class="text-[11px] text-slate-400 mt-1 leading-snug">
+              Industrial formulations with emulsifiers, protein isolates, modified starches, artificial flavors, colors, or sweeteners.
+            </p>
+          </button>
+        </div>
+
+        <div id="verdictDrawer" class="hidden rounded-xl border p-4 transition-all">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span id="verdictStatusBadge" class="px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider">CORRECT!</span>
+                <span id="verdictActualGroupBadge" class="px-2.5 py-0.5 rounded-md text-xs font-bold mono">Official Classification</span>
+              </div>
+              <h4 id="verdictHeadline" class="text-base font-extrabold text-white"></h4>
+              <p id="verdictExplanation" class="text-xs sm:text-sm text-slate-200 leading-relaxed"></p>
+            </div>
+            <div class="shrink-0 flex items-center gap-2">
+              <button id="nextSpecimenBtn" type="button" class="pulse-next w-full md:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm tracking-wide transition shadow-lg">
+                Next Specimen (Space) →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 2: NOVA FIELD GUIDE & PHOTO GALLERY ==================== -->
+    <section id="viewGuide" class="hidden space-y-6">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Monteiro et al. &amp; FAO / Open Food Facts Framework</span>
+            <h2 class="text-xl sm:text-2xl font-black text-white mt-0.5">How to Spot the 4 NOVA Food Groups</h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-3xl">
+              Developed by researchers at the University of São Paulo led by Carlos Monteiro, the NOVA classification sorts foods not by calories or nutrients, but by the <strong>nature, extent, and purpose of industrial processing</strong>.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 shrink-0">
+            <a href="https://world.openfoodfacts.org/nova" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-emerald-300 transition">
+              Open Food Facts NOVA ↗
+            </a>
+            <a href="https://openknowledge.fao.org/server/api/core/bitstreams/5277b379-0acb-4d97-a6a3-602774104629/content" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-sky-300 transition">
+              FAO NOVA Report ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+          <div class="bg-slate-950 border border-emerald-500/40 rounded-2xl overflow-hidden flex flex-col">
+            <div class="grid grid-cols-2 gap-1 h-48 bg-slate-900">
+              <img src="images/nova1_whole_foods.jpg" alt="NOVA 1 Whole Foods" class="w-full h-full object-cover" />
+              <img src="images/nova1_lentils_almonds_spinach.jpg" alt="NOVA 1 Lentils Almonds Spinach" class="w-full h-full object-cover" />
+            </div>
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-2">
+              <div>
+                <span class="px-2.5 py-0.5 rounded bg-emerald-500 text-slate-950 font-black text-xs mono">NOVA GROUP 1</span>
+                <h3 class="text-base font-extrabold text-white mt-1.5">Unprocessed or Minimally Processed Foods</h3>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Edible parts of plants or animals in their natural state, or altered only by drying, crushing, grinding, pasteurizing, chilling, freezing, or plain fermentation.
+                </p>
+              </div>
+              <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-2.5 text-xs">
+                <div class="font-bold text-emerald-300">Label Detective Rule:</div>
+                <p class="text-slate-300 mt-0.5">Usually a single whole ingredient (or live cultures in plain yogurt). <strong>Zero</strong> added salt, sugar, oils, fats, or cosmetic additives.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-950 border border-amber-500/40 rounded-2xl overflow-hidden flex flex-col">
+            <div class="grid grid-cols-2 gap-1 h-48 bg-slate-900">
+              <img src="images/nova2_oil_butter_salt_honey.jpg" alt="NOVA 2 Oils Butter Salt Honey" class="w-full h-full object-cover" />
+              <img src="images/nova2_vinegar_sugar.jpg" alt="NOVA 2 Vinegar and Cane Sugar" class="w-full h-full object-cover" />
+            </div>
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-2">
+              <div>
+                <span class="px-2.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-xs mono">NOVA GROUP 2</span>
+                <h3 class="text-base font-extrabold text-white mt-1.5">Processed Culinary Ingredients</h3>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Substances obtained directly from Group 1 foods or from nature by pressing, refining, grinding, milling, or drying to prepare, season, and cook Group 1 meals.
+                </p>
+              </div>
+              <div class="bg-amber-950/30 border border-amber-500/30 rounded-xl p-2.5 text-xs">
+                <div class="font-bold text-amber-300">Label Detective Rule:</div>
+                <p class="text-slate-300 mt-0.5">Includes <strong>olive &amp; seed oils, unsalted butter, sea salt, cane sugar, pure honey, and culinary vinegars</strong>.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-950 border border-orange-500/40 rounded-2xl overflow-hidden flex flex-col">
+            <div class="grid grid-cols-2 gap-1 h-48 bg-slate-900">
+              <img src="images/nova3_bread_cheese_chickpeas_cashews.jpg" alt="NOVA 3 Bread Cheese Chickpeas" class="w-full h-full object-cover" />
+              <img src="images/nova3_sardines_peaches.jpg" alt="NOVA 3 Tinned Sardines and Peaches" class="w-full h-full object-cover" />
+            </div>
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-2">
+              <div>
+                <span class="px-2.5 py-0.5 rounded bg-orange-500 text-slate-950 font-black text-xs mono">NOVA GROUP 3</span>
+                <h3 class="text-base font-extrabold text-white mt-1.5">Processed Foods</h3>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Manufactured by adding Group 2 culinary ingredients (salt, sugar, oil, vinegar) to Group 1 whole foods via canning, bottling, curing, fermentation, or baking.
+                </p>
+              </div>
+              <div class="bg-orange-950/30 border border-orange-500/30 rounded-xl p-2.5 text-xs">
+                <div class="font-bold text-orange-300">Label Detective Rule:</div>
+                <p class="text-slate-300 mt-0.5">Formula = <strong>Group 1 Food + Group 2 Ingredient</strong> (2–4 kitchen-recognizable ingredients, zero emulsifiers or artificial flavors).</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-950 border border-rose-500/40 rounded-2xl overflow-hidden flex flex-col">
+            <div class="grid grid-cols-2 gap-1 h-48 bg-slate-900">
+              <img src="images/nova4_cola_chips_cereal_bar.jpg" alt="NOVA 4 Soda Chips Cereal Bar" class="w-full h-full object-cover" />
+              <img src="images/nova4_sliced_bread_flavored_yogurt.jpg" alt="NOVA 4 Packaged Bread and Flavored Yogurt" class="w-full h-full object-cover" />
+            </div>
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-2">
+              <div>
+                <span class="px-2.5 py-0.5 rounded bg-rose-500 text-white font-black text-xs mono">NOVA GROUP 4</span>
+                <h3 class="text-base font-extrabold text-white mt-1.5">Ultra-Processed Food &amp; Drink Products (UPFs)</h3>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Industrial formulations made from extracted food substances (protein isolates, modified starches, hydrogenated oils, HFCS) and cosmetic additives.
+                </p>
+              </div>
+              <div class="bg-rose-950/30 border border-rose-500/30 rounded-xl p-2.5 text-xs">
+                <div class="font-bold text-rose-300">Label Detective Rule:</div>
+                <p class="text-slate-300 mt-0.5">Spot at least one <strong>non-kitchen marker</strong>: emulsifiers (soy lecithin, mono-/diglycerides, DATEM), artificial flavors, synthetic dyes, MSG, or sucralose.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: 24-ITEM PANTRY DEX ==================== -->
+    <section id="viewDex" class="hidden space-y-4">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-black text-white">Pantry Specimen Dex (24 Authenticated Products with Photos)</h2>
+          <p class="text-xs text-slate-400">Filter by NOVA group or search ingredients. Click any specimen to load its photo and label onto the scanner workbench.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+            <button type="button" data-dex-filter="all" class="dex-filter-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950">All (24)</button>
+            <button type="button" data-dex-filter="1" class="dex-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">NOVA 1</button>
+            <button type="button" data-dex-filter="2" class="dex-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">NOVA 2</button>
+            <button type="button" data-dex-filter="3" class="dex-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">NOVA 3</button>
+            <button type="button" data-dex-filter="4" class="dex-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">NOVA 4</button>
+          </div>
+          <input id="dexSearchInput" type="search" placeholder="Search food or ingredient..." class="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
+        </div>
+      </div>
+
+      <div id="dexGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </section>
+
+    <!-- ==================== VIEW 4: GITHUB REPOSITORY FILES (HTML / CSS / JS) ==================== -->
+    <section id="viewGithub" class="hidden space-y-4">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">GitHub Pages Ready Architecture</span>
+            <h2 class="text-xl font-black text-white mt-0.5">Separated Repository Files (`index.html`, `style.css`, `script.js`)</h2>
+            <p class="text-xs text-slate-300 mt-1">
+              Use the downloadable <code class="text-emerald-300 mono">nova_spotter_github.zip</code> archive (which includes <code class="mono">index.html</code>, <code class="mono">style.css</code>, <code class="mono">script.js</code>, <code class="mono">README.md</code>, and the <code class="mono">images/</code> folder) or copy/download individual source files below.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="copySourceBtn" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition">
+              📋 Copy Current File
+            </button>
+            <button id="downloadSourceBtn" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition">
+              ⬇ Download File
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" data-code-file="index.html" class="code-file-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-500 text-white mono">
+            index.html
+          </button>
+          <button type="button" data-code-file="style.css" class="code-file-tab px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-950 text-slate-300 hover:text-white border border-slate-800 mono">
+            style.css
+          </button>
+          <button type="button" data-code-file="script.js" class="code-file-tab px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-950 text-slate-300 hover:text-white border border-slate-800 mono">
+            script.js
+          </button>
+          <button type="button" data-code-file="README.md" class="code-file-tab px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-950 text-slate-300 hover:text-white border border-slate-800 mono">
+            README.md
+          </button>
+        </div>
+
+        <pre id="githubCodePre" class="code-viewer-pre custom-scrollbar mono"></pre>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ROUND SUMMARY / GAME OVER MODAL -->
+  <div id="summaryModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-slate-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 text-center">
+      <div id="modalBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+        Shift Complete
+      </div>
+      <h2 id="modalTitle" class="text-2xl font-black text-white">Inspector Certification Report</h2>
+      <p id="modalSubtitle" class="text-xs sm:text-sm text-slate-300"></p>
+
+      <div class="grid grid-cols-3 gap-2.5 bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+        <div>
+          <div class="text-[10px] uppercase font-bold text-slate-400">Final Score</div>
+          <div id="modalScore" class="text-xl font-black text-emerald-400 mono">0</div>
+        </div>
+        <div class="border-x border-slate-800">
+          <div class="text-[10px] uppercase font-bold text-slate-400">Accuracy</div>
+          <div id="modalAccuracy" class="text-xl font-black text-amber-400 mono">0%</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase font-bold text-slate-400">Best Streak</div>
+          <div id="modalBestStreak" class="text-xl font-black text-sky-400 mono">0x</div>
+        </div>
+      </div>
+
+      <div class="text-left">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Specimens Inspected This Shift:</div>
+        <div id="modalHistoryList" class="max-h-44 overflow-y-auto custom-scrollbar space-y-1.5 pr-1"></div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+        <button id="modalPlayAgainBtn" type="button" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm transition shadow-lg">
+          Play New Shift
+        </button>
+        <button id="modalReviewGuideBtn" type="button" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm transition">
+          Open NOVA Field Guide
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
